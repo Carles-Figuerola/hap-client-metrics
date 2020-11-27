@@ -13,9 +13,13 @@ def read_json_file(file):
             content = {}
     return content
 
-def write_pairing_data(pairing_data):
+def write_pairing_data(pairing_data, pairing_data_file):
     with open(pairing_data_file, 'w') as fd:
         json.dump(pairing_data, fd)
+
+def wipe_pairing_data(pairing_data_file):
+    with open(pairing_data_file, 'w') as fd:
+        fd.write("")
 
 
 def load_config(config_file, options):
@@ -46,7 +50,7 @@ def load_config(config_file, options):
     return config
 
 
-def pair_homekit(config, pairing_data):
+def pair_homekit(config, pairing_data, pairing_data_file):
 
     if pairing_data:
         client = HapClient(device_id=config['device_id'], pairing_data=pairing_data)
@@ -64,9 +68,13 @@ def pair_homekit(config, pairing_data):
         pair_result = client.pair(config['pin'])
         if pair_result:
             log.info("Successfully paired with the device")
-            write_pairing_data(client.pairing_data)
+            write_pairing_data(client.pairing_data, pairing_data_file)
             log.info("Saved pairing data")
         else:
             log.error("Failed to pair with the device")
 
     return client
+
+def unpair_homekit(client):
+    client.unpair()
+    return True

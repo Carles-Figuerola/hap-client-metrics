@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 from optparse import OptionParser
-from hap_init import write_pairing_data, read_json_file, load_config, pair_homekit
+from hap_init import write_pairing_data, wipe_pairing_data, read_json_file, load_config, pair_homekit, unpair_homekit
 from parse_lib import parse_data
 from graphite_lib import send_data
 import json
@@ -28,10 +28,14 @@ if __name__ == "__main__":
 
     pairing_data_file = f"{options.config_folder}/pairing_data.json"
     pairing_data = read_json_file(pairing_data_file)
-    client = pair_homekit(config, pairing_data)
+    client = pair_homekit(config, pairing_data, pairing_data_file)
 
     data_blob = client.get_accessories()
     data = parse_data(data_blob)
+
+    unpair = unpair_homekit(client)
+    if unpair:
+        wipe_pairing_data(pairing_data_file)
 
     if options.graphite_enabled:
         if options.graphite_hostname == '':
